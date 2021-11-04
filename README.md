@@ -1,2 +1,0 @@
-# Windows95
-Yepsepcepmep
