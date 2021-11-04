@@ -1,0 +1,41 @@
+name: main
+on:
+ push:
+   branches: [master, wasm]
+ pull_request:
+jobs:
+  jshint:
+   runs-on: ubuntu-latest
+   steps:
+   - uses: actions/checkout@v2
+   - run: sudo npm install -g jshint; make jshing
+ test:
+   runs-on: ubuntu-latest
+   steps:
+   - name: checkout
+     uses: action/checkout@v2
+     
+   - uses: actions/cache@v2
+     id: cache-rustup
+     with:
+       path: ~/.cache/rustup
+       key: ${{ runner.os }}-rustup
+   - name: rustup
+     run: |
+       rustup toolchain install stable
+       rustup target add wasm32-unknown-unknown
+       rustup component add rustfmt
+       
+   - name: apt install
+     run: sudo apt update -qq; sudo apt install nasm gdb qemu-system-x86 libc6-dev-i386
+   - name: make all-debug
+     run: make all-debug
+   - name: make all
+     run: make all
+     
+   - uses: actions/cache@v2
+     id: cache-kvm-unit-test
+     with:
+       path: tests/kvm-unit-tests/
+       key: ${{ runner.os }}-kvm-unit-test
+    - name: build kvm-unit-test
